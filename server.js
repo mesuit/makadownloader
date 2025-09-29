@@ -6,11 +6,11 @@ import { fileURLToPath } from "url";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Fix dirname in ES modules
+// Fix __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve frontend
+// Serve static files from public/
 app.use(express.static(path.join(__dirname, "public")));
 
 // 🔎 Search route
@@ -21,7 +21,9 @@ app.get("/api/search", async (req, res) => {
   try {
     const apiUrl = `https://apis-keith.vercel.app/search?q=${encodeURIComponent(query)}`;
     const response = await axios.get(apiUrl);
-    res.json(response.data); // Send raw result
+
+    // Normalize to always send result array
+    res.json({ result: response.data.result || [] });
   } catch (err) {
     console.error("❌ Search error:", err.message);
     res.status(500).json({ error: "Search failed" });
@@ -31,7 +33,7 @@ app.get("/api/search", async (req, res) => {
 // 🎵 Download route
 app.get("/api/download", async (req, res) => {
   const videoUrl = req.query.url;
-  const format = req.query.format || "mp3"; // default mp3
+  const format = req.query.format || "mp3";
 
   if (!videoUrl) return res.status(400).json({ error: "Missing video URL" });
 
@@ -55,5 +57,6 @@ app.get("/api/download", async (req, res) => {
   }
 });
 
+// Start server
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
 
