@@ -1,70 +1,59 @@
 import express from "express";
-import fetch from "node-fetch";
+import axios from "axios";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ES module __dirname fix
+// Fix dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// serve frontend
+// Serve frontend
 app.use(express.static(path.join(__dirname, "public")));
 
-// 🔍 Search endpoint
+// 🔎 Search route
 app.get("/api/search", async (req, res) => {
-  const query = req.query.query;
-  if (!query) {
-    return res.status(400).json({ error: "No query provided" });
-  }
+  const query = req.query.q;
+  if (!query) return res.status(400).json({ error: "Missing query" });
 
   try {
-    const apiUrl = `https://apis.davidcyriltech.my.id/search/ytsearch?query=${encodeURIComponent(
-      query
-    )}`;
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-
-    if (data && data.result && data.result.length > 0) {
-      res.json(data.result);
-    } else {
-      res.json([]);
-    }
+    const apiUrl = `https://apis-keith.vercel.app/search?q=${encodeURIComponent(query)}`;
+    const response = await axios.get(apiUrl);
+    res.json(response.data); // Send raw result
   } catch (err) {
-    console.error("Search error:", err);
-    res.status(500).json({ error: "Failed to fetch results" });
+    console.error("❌ Search error:", err.message);
+    res.status(500).json({ error: "Search failed" });
   }
 });
 
-// 🎵 Download endpoint
+// 🎵 Download route
 app.get("/api/download", async (req, res) => {
-  const { url, type } = req.query;
-  if (!url || !type) {
-    return res.status(400).json({ error: "Missing url or type" });
-  }
+  const videoUrl = req.query.url;
+  const format = req.query.format || "mp3"; // default mp3
+
+  if (!videoUrl) return res.status(400).json({ error: "Missing video URL" });
 
   try {
     const apiUrl =
-      type === "mp3"
-        ? `https://apis.davidcyriltech.my.id/download/ytmp3?url=${encodeURIComponent(
-            url
-          )}`
-        : `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(
-            url
-          )}`;
+      format === "mp3"
+        ? `https://apis.davidcyriltech.my.id/download/ytmp3?url=${encodeURIComponent(videoUrl)}`
+        : `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(videoUrl)}`;
 
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-    res.json(data);
+    const response = await axios.get(apiUrl);
+
+    if (!response.data || !response.data.result || !response.data.result.download_url) {
+      return res.status(500).json({ error: "Invalid API response" });
+    }
+
+    const downloadUrl = response.data.result.download_url;
+    return res.redirect(downloadUrl);
   } catch (err) {
-    console.error("Download error:", err);
-    res.status(500).json({ error: "Failed to fetch download link" });
+    console.error("❌ Download error:", err.message);
+    res.status(500).json({ error: "Download failed" });
   }
 });
 
-app.listen(PORT, () =>
-  console.log(`🚀 Server running at http://localhost:${PORT}`)
-);
+app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
 
