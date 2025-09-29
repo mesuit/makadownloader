@@ -1,53 +1,46 @@
-document.getElementById("searchBtn").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const query = document.getElementById("searchInput").value.trim();
-  const resultsDiv = document.getElementById("results");
-  resultsDiv.innerHTML = "Searching...";
+document.getElementById("searchBtn").addEventListener("click", searchVideos);
+document.getElementById("query").addEventListener("keypress", e => {
+  if (e.key === "Enter") searchVideos();
+});
+
+async function searchVideos() {
+  const query = document.getElementById("query").value.trim();
+  const resultsEl = document.getElementById("results");
+  resultsEl.innerHTML = "Searching...";
+
+  if (!query) {
+    resultsEl.innerHTML = "<li>Please enter a search term</li>";
+    return;
+  }
 
   try {
-    const res = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
-    const results = await res.json();
+    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    const data = await res.json();
 
-    resultsDiv.innerHTML = "";
-
-    if (!results || results.length === 0) {
-      resultsDiv.innerHTML = "<p>No results found.</p>";
+    if (!data || !data.result || data.result.length === 0) {
+      resultsEl.innerHTML = "<li>No results found</li>";
       return;
     }
 
-    results.forEach((video) => {
-      const card = document.createElement("div");
-      card.className = "result-card";
-      card.innerHTML = `
-        <img src="${video.thumbnail}" width="150" />
-        <h3>${video.title}</h3>
-        <p>Views: ${video.views} | Duration: ${video.duration}</p>
-        <button onclick="downloadMedia('${video.url}','mp3')">Download MP3</button>
-        <button onclick="downloadMedia('${video.url}','mp4')">Download MP4</button>
+    resultsEl.innerHTML = "";
+    data.result.forEach(item => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <img src="${item.thumbnail}" width="200"><br>
+        <b>${item.title}</b><br>
+        <small>${item.published} • ${item.views} views</small><br>
+        <button onclick="downloadMedia('${item.url}', 'mp3')">Download MP3</button>
+        <button onclick="downloadMedia('${item.url}', 'mp4')">Download MP4</button>
       `;
-      resultsDiv.appendChild(card);
+      resultsEl.appendChild(li);
     });
   } catch (err) {
-    console.error("Search failed:", err);
-    resultsDiv.innerHTML = "<p>Error while searching.</p>";
+    console.error("❌ Search error:", err);
+    resultsEl.innerHTML = "<li>Search failed</li>";
   }
-});
+}
 
-async function downloadMedia(url, type) {
-  try {
-    const res = await fetch(
-      `/api/download?url=${encodeURIComponent(url)}&type=${type}`
-    );
-    const data = await res.json();
-
-    if (data && data.result && data.result.download_url) {
-      window.open(data.result.download_url, "_blank");
-    } else {
-      alert("Download link not available.");
-    }
-  } catch (err) {
-    console.error("Download error:", err);
-    alert("Failed to download.");
-  }
+function downloadMedia(videoUrl, format) {
+  window.location.href = `/api/download?url=${encodeURIComponent(videoUrl)}&format=${format}`;
 }
 
