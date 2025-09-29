@@ -1,80 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title> Makamesco Media Downloader</title>
+  <meta charset="UTF-8">
+  <title> Maka Media Downloader</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f8f8f8;
-      padding: 20px;
-    }
-    h1 {
-      color: #333;
-    }
-    #searchInput {
-      width: 60%;
-      padding: 10px;
-      margin: 10px;
-    }
-    #searchBtn {
-      padding: 10px 20px;
-      cursor: pointer;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-      margin-top: 20px;
-    }
-    li {
-      background: #fff;
-      margin: 10px auto;
-      padding: 15px;
-      border-radius: 10px;
-      width: 80%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    img {
-      width: 120px;
-      border-radius: 5px;
-    }
-    .info {
-      flex: 1;
-      margin-left: 15px;
-      text-align: left;
-    }
-    button {
-      padding: 8px 15px;
-      margin: 5px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .mp3 {
-      background: #4CAF50;
-      color: white;
-    }
-    .mp4 {
-      background: #f44336;
-      color: white;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #results li { margin: 15px 0; list-style: none; }
+    img { border-radius: 6px; margin-bottom: 6px; }
+    button { margin-right: 10px; padding: 5px 10px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h1>🎵  Makamesco Media Downloader</h1>
-
-  <input type="text" id="searchInput" placeholder="Search for a song or video..." />
+  <h1>🎵 Media Downloader</h1>
+  <input id="query" type="text" placeholder="Search for a video..." size="50">
   <button id="searchBtn">Search</button>
-
   <ul id="results"></ul>
-
   <script src="app.js"></script>
 </body>
 </html>
-
