@@ -23,11 +23,13 @@ document.getElementById("searchBtn").addEventListener("click", async () => {
         <img src="${item.thumbnail}" alt="${item.title}">
         <div class="info">
           <h3>${item.title}</h3>
-          <p>${item.author?.name || "Unknown Author"}</p>
+          <p>Views: ${item.views}</p>
+          <p>Duration: ${item.duration}</p>
+          <p>Published: ${item.published}</p>
         </div>
         <div>
-          <button class="mp3" onclick="downloadMedia('${item.url}', 'mp3')">MP3</button>
-          <button class="mp4" onclick="downloadMedia('${item.url}', 'mp4')">MP4</button>
+          <button class="mp3" onclick="downloadMedia('${item.url}', 'mp3')">Download MP3</button>
+          <button class="mp4" onclick="downloadMedia('${item.url}', 'mp4')">Download MP4</button>
         </div>
       `;
 
