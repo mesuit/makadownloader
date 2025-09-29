@@ -17,7 +17,9 @@ async function searchVideos() {
     const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
     const data = await res.json();
 
-    if (!data || !data.result || data.result.length === 0) {
+    console.log("🔎 Got search data:", data);
+
+    if (!data.result || data.result.length === 0) {
       resultsEl.innerHTML = "<li>No results found</li>";
       return;
     }
