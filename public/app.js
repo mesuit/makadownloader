@@ -1,53 +1,44 @@
-async function searchVideo() {
+document.getElementById("searchBtn").addEventListener("click", async () => {
   const query = document.getElementById("searchInput").value.trim();
-  if (!query) return alert("Please enter a search term");
+  if (!query) return alert("Enter a search term");
 
-  const resultsDiv = document.getElementById("results");
-  resultsDiv.innerHTML = "<p>⏳ Searching...</p>";
+  const resultsEl = document.getElementById("results");
+  resultsEl.innerHTML = "<li>Searching...</li>";
 
   try {
-    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-    const data = await response.json();
+    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    const data = await res.json();
 
-    if (data.error) {
-      resultsDiv.innerHTML = `<p style="color:red;">❌ ${data.error}</p>`;
+    resultsEl.innerHTML = "";
+
+    if (!data || !data.result || data.result.length === 0) {
+      resultsEl.innerHTML = "<li>No results found</li>";
       return;
     }
 
-    resultsDiv.innerHTML = `
-      <div class="card">
-        <h3>${data.title}</h3>
-        <img src="${data.thumbnail}" alt="Thumbnail"><br>
-        <p>⏱ Duration: ${data.duration || "N/A"}</p>
-        <p>👤 Channel: ${data.channel}</p>
-        <p>👁 Views: ${data.views}</p>
-        <a href="/api/download?url=${encodeURIComponent(data.url)}&type=audio" target="_blank">
-          <button>⬇ Download MP3</button>
-        </a>
-        <a href="/api/download?url=${encodeURIComponent(data.url)}&type=video" target="_blank">
-          <button>⬇ Download MP4</button>
-        </a>
-        <button onclick="previewAudio('${data.url}')">🎧 Preview Audio</button>
-      </div>
-    `;
+    data.result.forEach(item => {
+      const li = document.createElement("li");
+
+      li.innerHTML = `
+        <img src="${item.thumbnail}" alt="${item.title}">
+        <div class="info">
+          <h3>${item.title}</h3>
+          <p>${item.author?.name || "Unknown Author"}</p>
+        </div>
+        <div>
+          <button class="mp3" onclick="downloadMedia('${item.url}', 'mp3')">MP3</button>
+          <button class="mp4" onclick="downloadMedia('${item.url}', 'mp4')">MP4</button>
+        </div>
+      `;
+
+      resultsEl.appendChild(li);
+    });
   } catch (err) {
-    resultsDiv.innerHTML = `<p style="color:red;">⚠️ Error: ${err.message}</p>`;
+    console.error("Search error:", err);
+    resultsEl.innerHTML = "<li>Error searching. Try again later.</li>";
   }
-}
+});
 
-async function previewAudio(url) {
-  try {
-    const response = await fetch(`/api/preview?url=${encodeURIComponent(url)}`);
-    const data = await response.json();
-
-    if (data.error) {
-      alert("❌ Preview failed: " + data.error);
-      return;
-    }
-
-    const audio = new Audio(data.previewUrl);
-    audio.play();
-  } catch (err) {
-    alert("⚠️ Preview error: " + err.message);
-  }
+function downloadMedia(url, format) {
+  window.location.href = `/api/download?url=${encodeURIComponent(url)}&format=${format}`;
 }
